@@ -3,17 +3,9 @@
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-DEFAULT_MODEL='D:/Models/RVT2/model_99.pth'
-MODEL_PATH="${1:-$DEFAULT_MODEL}"
 
 if [[ ! -f "$SCRIPT_DIR/package.py" ]]; then
     echo "Error: package.py was not found in '$SCRIPT_DIR'." >&2
-    exit 1
-fi
-
-if [[ ! -f "$MODEL_PATH" ]]; then
-    echo "Error: model file was not found: $MODEL_PATH" >&2
-    echo "Usage: $0 [MODEL_FILE]" >&2
     exit 1
 fi
 
@@ -53,8 +45,8 @@ if ! find_python; then
     exit 1
 fi
 
-echo "Opening model: $MODEL_PATH"
-echo 'Netron will run locally and open in the default browser.'
+echo 'Starting Netron locally in the default browser.'
+echo 'Use Open Model in Netron to select a model file.'
 
 cd -- "$SCRIPT_DIR"
-exec "${PYTHON[@]}" package.py build start "$MODEL_PATH" --browse
+exec "${PYTHON[@]}" package.py build start --browse
