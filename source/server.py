@@ -114,6 +114,9 @@ class _HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         if content:
             self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", len(content))
+            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
         self.end_headers()
         if self.command != "HEAD":
             if status_code == 404 and content is None:

@@ -63,7 +63,7 @@ browser.Host = class {
                 document.body.classList.remove('spinner');
                 for (;;) {
                     // eslint-disable-next-line no-await-in-loop
-                    await this.message('Please update to the newest version.', null, 'Update');
+                    await this.message('请更新到最新版本。', null, '更新');
                     this.openURL(link);
                 }
             }
@@ -86,7 +86,7 @@ browser.Host = class {
             }
             if (consent) {
                 document.body.classList.remove('spinner');
-                await this.message('This app uses cookies to report errors and anonymous usage information.', null, 'Accept');
+                await this.message('此应用使用 Cookie 报告错误和匿名使用信息。', null, '接受');
             }
             this._setCookie('consent', Date.now().toString(), 30);
         };
@@ -454,7 +454,7 @@ browser.Host = class {
             context = new browser.Context(this, url, identifier, name, stream);
             this._telemetry.set('session_engaged', 1);
         } catch (error) {
-            await this._view.error(error, 'Model load request failed.');
+            await this._view.error(error, '模型加载请求失败。');
             this._view.show('welcome');
             return null;
         }
@@ -488,7 +488,7 @@ browser.Host = class {
             }
             if (message) {
                 const error = new Error(message);
-                error.name = 'Error while loading Gist.';
+                error.name = '加载 Gist 时出错。';
                 throw error;
             }
             const identifier = file.filename;
@@ -498,7 +498,7 @@ browser.Host = class {
             const context = new browser.Context(this, '', identifier, null, stream);
             await this._openContext(context);
         } catch (error) {
-            await this._view.error(error, 'Error while loading Gist.');
+            await this._view.error(error, '加载 Gist 时出错。');
             this._view.show('welcome');
         }
     }

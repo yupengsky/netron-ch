@@ -101,7 +101,7 @@ desktop.Host = class {
                 const link = this._element('logo-github').href;
                 for (;;) {
                     /* eslint-disable-next-line no-await-in-loop */
-                    await this.message('Please update to the newest version.', null, 'Download');
+                    await this.message('请更新到最新版本。', null, '下载');
                     this.openURL(link);
                 }
             }
@@ -123,7 +123,7 @@ desktop.Host = class {
                 }
                 if (consent) {
                     this.document.body.classList.remove('spinner');
-                    await this.message('This app uses cookies to report errors and anonymous usage information.', null, 'Accept');
+                    await this.message('此应用使用 Cookie 报告错误和匿名使用信息。', null, '接受');
                 }
                 this.set('consent', Date.now());
             }
@@ -274,7 +274,7 @@ desktop.Host = class {
     }
 
     async error(message) {
-        await this.message(message, true, 'OK');
+        await this.message(message, true, '确定');
     }
 
     async require(id) {
@@ -297,9 +297,9 @@ desktop.Host = class {
                 }
             });
             electron.ipcRenderer.send('show-save-dialog', {
-                title: 'Export Tensor',
+                title: '导出张量',
                 defaultPath,
-                buttonLabel: 'Export',
+                buttonLabel: '导出',
                 filters: [{ name, extensions: [extension] }]
             });
         });
@@ -312,7 +312,7 @@ desktop.Host = class {
             const data = new Uint8Array(e.target.result);
             fs.writeFile(file, data, null, async (error) => {
                 if (error) {
-                    await this._view.error(error, 'Error writing file.');
+                    await this._view.error(error, '写入文件时出错。');
                 }
             });
         };
@@ -323,7 +323,7 @@ desktop.Host = class {
             error = new Error(`Export blob type is '${typeof blob}'.`);
         }
         if (error) {
-            await this._view.error(error, 'Error exporting image.');
+            await this._view.error(error, '导出图像时出错。');
         } else {
             reader.readAsArrayBuffer(blob);
         }
@@ -482,7 +482,7 @@ desktop.Host = class {
                 context = await this._context(path);
                 this._telemetry.set('session_engaged', 1);
             } catch (error) {
-                await this._view.error(error, 'Error while reading file.');
+                await this._view.error(error, '读取文件时出错。');
                 this.update({ path: null });
                 return;
             }

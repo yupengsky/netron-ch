@@ -95,7 +95,7 @@ window.addEventListener('error', function (event) {
 window.addEventListener('load', function() {
     if (typeof Symbol !== 'function' || typeof Symbol.asyncIterator !== 'symbol' ||
         typeof BigInt !== 'function' || typeof BigInt.asIntN !== 'function' || typeof BigInt.asUintN !== 'function' || typeof DataView.prototype.getBigInt64 !== 'function') {
-        throw new Error('Please update your browser to use this application.');
+        throw new Error('请更新浏览器后再使用此应用。');
     }
     var ua = window.navigator.userAgent;
     var chrome = ua.match(/Chrom(e|ium)\/([0-9]+)\./);
@@ -104,7 +104,7 @@ window.addEventListener('load', function() {
     if ((Array.isArray(chrome) && parseInt(chrome[2], 10) < 86) ||
         (Array.isArray(safari) && (parseInt(safari[1], 10) < 16 || (parseInt(safari[1], 10) === 16 && parseInt(safari[2], 10) < 4))) ||
         (Array.isArray(firefox) && parseInt(firefox[1], 10) < 114)) {
-        throw new Error('Please update your browser to use this application.');
+        throw new Error('请更新浏览器后再使用此应用。');
     }
     window.exports.preload(function(value, error) {
         if (error) {

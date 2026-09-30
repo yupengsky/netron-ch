@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="description" content="Visualizer for neural network, deep learning and machine learning models." />
+<meta name="description" content="神经网络、深度学习和机器学习模型可视化工具。" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="script-src 'self'; frame-src 'none'">
 <meta name="version" content="0.0.0">
@@ -339,7 +339,7 @@ button { font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI"
     </svg>
 </div>
 <div id="toolbar" class="toolbar">
-    <button id="zoom-in-button" class="toolbar-button" title="Zoom In">
+    <button id="zoom-in-button" class="toolbar-button" title="放大">
         <svg class="toolbar-icon" viewbox="0 0 100 100">
             <circle class="border" cx="50" cy="50" r="35" stroke-width="8" stroke="#fff"></circle>
             <line class="border" x1="50" y1="38" x2="50" y2="62" stroke-width="8" stroke-linecap="round" stroke="#fff"></line>
@@ -351,7 +351,7 @@ button { font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI"
             <line class="stroke" x1="78" y1="78" x2="82" y2="82" stroke-width="8" stroke-linecap="square"></line>
         </svg>
     </button>
-    <button id="zoom-out-button" class="toolbar-button" title="Zoom Out">
+    <button id="zoom-out-button" class="toolbar-button" title="缩小">
         <svg class="toolbar-icon" viewbox="0 0 100 100">
             <circle class="border" cx="50" cy="50" r="35" stroke-width="8" stroke="#fff"></circle>
             <line class="border" x1="38" y1="50" x2="62" y2="50" stroke-width="8" stroke-linecap="round" stroke="#fff"></line>
@@ -361,7 +361,7 @@ button { font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI"
             <line class="stroke" x1="78" y1="78" x2="82" y2="82" stroke-width="8" stroke-linecap="square"></line>
         </svg>
     </button>
-    <button id="sidebar-model-button" class="toolbar-button" title="Model Properties">
+    <button id="sidebar-model-button" class="toolbar-button" title="模型属性">
         <svg class="toolbar-icon" viewbox="0 0 100 100">
             <rect class="border" x="12" y="12" width="76" height="76" rx="16" ry="16" stroke-width="8"></rect>
             <line class="border" x1="28" y1="37" x2="32" y2="37" stroke-width="8" stroke-linecap="round" stroke="#fff"></line>
@@ -379,7 +379,7 @@ button { font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI"
             <line class="stroke" x1="40" y1="63" x2="70" y2="63" stroke-width="4" stroke-linecap="round"></line>
         </svg>
     </button>
-    <button id="sidebar-target-button" class="toolbar-button" title="Target Properties">
+    <button id="sidebar-target-button" class="toolbar-button" title="图属性">
         <svg class="toolbar-icon" viewBox="0 0 100 100">
             <rect class="border" x="12" y="12" width="76" height="76" rx="16" ry="16" stroke-width="8"></rect>
             <circle class="border" cx="50" cy="50" r="18" stroke-width="8"></circle>
@@ -391,11 +391,11 @@ button { font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI"
     </button>
     <div id="toolbar-navigator" class="toolbar-select">
         <select id="toolbar-target-selector">
-            <option value="Graphs" disabled="true">&#x2014; Graphs &#x2014;&#x2014;</option>
+            <option value="Graphs" disabled="true">&#x2014; 计算图 &#x2014;&#x2014;</option>
             <option value="add">add</option>
             <option value="subtract">subtract</option>
             <option value="multiply">multiply</option>
-            <option value="Functions" disabled="true">&#x2014; Functions &#x2014;&#x2014;</option>
+            <option value="Functions" disabled="true">&#x2014; 函数 &#x2014;&#x2014;</option>
             <option value="line">foo_bar.foo</option>
         </select>
         <svg class="toolbar-select-arrow" viewBox="0 0 10 6" width="10" height="6">
@@ -403,7 +403,7 @@ button { font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI"
         </svg>
     </div>
     <div id="toolbar-path" class="toolbar-path">
-        <button id="toolbar-path-back-button" class="toolbar-path-back-button" title="Back">
+        <button id="toolbar-path-back-button" class="toolbar-path-back-button" title="返回">
             &#x276E;
         </button>
     </div>
@@ -523,7 +523,7 @@ button { font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI"
         </svg>
     </a>
     <div class="center logo-message">
-        <div style="height: 30px; text-align: center;">Version <span id="version" class="select">{version}</span></div>
+        <div style="height: 30px; text-align: center;">版本 <span id="version" class="select">{version}</span></div>
         <div style="height: 30px; text-align: center;">Copyright &copy; <a href="https://www.lutzroeder.com" target="blank_">Lutz Roeder</a></div>
     </div>
     <a id="logo-github" class="center logo-github" href="https://github.com/lutzroeder/netron" target="blank_">
@@ -550,7 +550,7 @@ button { font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI"
                 C438.536,184.851,428.728,148.168,409.132,114.573z"/>
         </svg>
     </a>
-    <button id="open-file-button" class="center logo-button open-file-button" tabindex="0">Open Model&hellip;</button>
+    <button id="open-file-button" class="center logo-button open-file-button" tabindex="0">打开模型&hellip;</button>
     <div class="center progress">
         <div id="progress-bar" class="progress-bar"></div>
     </div>
@@ -562,7 +562,7 @@ button { font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI"
 </div>
 <div id="message" class="message">
     <div id="message-text" class="message-text"></div>
-    <button id="message-button" class="logo-button message-button" tabindex="0">OK</button>
+    <button id="message-button" class="logo-button message-button" tabindex="0">确定</button>
 </div>
 <div id="titlebar" class="titlebar">
     <svg style="position: absolute; width: 0px; height: 0px; overflow: hidden;" aria-hidden="true">
@@ -574,12 +574,12 @@ button { font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI"
         <span id="titlebar-content-text" class="titlebar-content-text"></span>
     </div>
     <div id="titlebar-control-box" class="titlebar-control-box">
-        <div id="titlebar-close" class="titlebar-button titlebar-button-close" title="Close">
+        <div id="titlebar-close" class="titlebar-button titlebar-button-close" title="关闭">
             <svg class="titlebar-icon" aria-hidden="true">
                 <path d="M 0,0 0,0.7 4.3,5 0,9.3 0,10 0.7,10 5,5.7 9.3,10 10,10 10,9.3 5.7,5 10,0.7 10,0 9.3,0 5,4.3 0.7,0 Z"></path>
             </svg>
         </div>
-        <div id="titlebar-toggle" class="titlebar-button" title="Maximize">
+        <div id="titlebar-toggle" class="titlebar-button" title="最大化/还原">
             <svg id="titlebar-maximize" class="titlebar-icon" aria-hidden="true" style="position: absolute;">
                 <path d="M 0,0 0,10 10,10 10,0 Z M 1,1 9,1 9,9 1,9 Z"></path>
             </svg>
@@ -587,7 +587,7 @@ button { font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI"
                 <path d="m 2,1e-5 0,2 -2,0 0,8 8,0 0,-2 2,0 0,-8 z m 1,1 6,0 0,6 -1,0 0,-5 -5,0 z m -2,2 6,0 0,6 -6,0 z"></path>
             </svg>
         </div>
-        <div id="titlebar-minimize" class="titlebar-button" title="Minimize">
+        <div id="titlebar-minimize" class="titlebar-button" title="最小化">
             <svg class="titlebar-icon" aria-hidden="true">
                 <path d="M 0,5 10,5 10,6 0,6 Z"></path>
             </svg>

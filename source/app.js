@@ -192,8 +192,9 @@ app.Application = class {
         if (paths.length === 0) {
             const extensions = new base.Metadata().extensions;
             const options = {
+                title: '打开模型',
                 properties: ['openFile'],
-                filters: [{ name: 'All Model Files', extensions }]
+                filters: [{ name: '所有模型文件', extensions }]
             };
             const owner = electron.BrowserWindow.getFocusedWindow();
             paths = electron.dialog.showOpenDialogSync(owner, options);
@@ -249,7 +250,7 @@ app.Application = class {
     async _export() {
         const view = this._views.activeView;
         if (view && view.path) {
-            let defaultPath = 'Untitled';
+            let defaultPath = '未命名';
             const file = view.path;
             const lastIndex = file.lastIndexOf('.');
             if (lastIndex !== -1) {
@@ -257,9 +258,9 @@ app.Application = class {
             }
             const owner = electron.BrowserWindow.getFocusedWindow();
             const options = {
-                title: 'Export',
+                title: '导出',
                 defaultPath,
-                buttonLabel: 'Export',
+                buttonLabel: '导出',
                 filters: [
                     { name: 'PNG', extensions: ['png'] },
                     { name: 'SVG', extensions: ['svg'] }
@@ -389,7 +390,7 @@ app.Application = class {
                     label: electron.app.name,
                     submenu: [
                         {
-                            label: `About ${electron.app.name}`,
+                            label: `关于 ${electron.app.name}`,
                             click: () => /* this.execute('about', null) */ this._about()
                         },
                         { type: 'separator' },
@@ -404,18 +405,18 @@ app.Application = class {
 
             const fileSubmenu = [
                 {
-                    label: '&Open...',
+                    label: '打开(&O)...',
                     accelerator: 'CmdOrCtrl+O',
                     click: () => this._open(null)
                 },
                 {
-                    label: 'Open &Recent',
+                    label: '最近打开(&R)',
                     submenu: menuRecentsTemplate
                 },
                 { type: 'separator' },
                 {
                     id: 'file.export',
-                    label: '&Export...',
+                    label: '导出(&E)...',
                     accelerator: 'CmdOrCtrl+Shift+E',
                     click: async () => await this.execute('export', null)
                 },
@@ -431,7 +432,7 @@ app.Application = class {
             }
 
             menuTemplate.push({
-                label: '&File',
+                label: '文件(&F)',
                 submenu: fileSubmenu
             });
 
@@ -441,36 +442,36 @@ app.Application = class {
             }
 
             menuTemplate.push({
-                label: '&Edit',
+                label: '编辑(&E)',
                 submenu: [
                     {
                         id: 'edit.cut',
-                        label: 'Cu&t',
+                        label: '剪切(&T)',
                         accelerator: 'CmdOrCtrl+X',
                         click: async () => await this.execute('cut', null),
                     },
                     {
                         id: 'edit.copy',
-                        label: '&Copy',
+                        label: '复制(&C)',
                         accelerator: 'CmdOrCtrl+C',
                         click: async () => await this.execute('copy', null),
                     },
                     {
                         id: 'edit.paste',
-                        label: '&Paste',
+                        label: '粘贴(&P)',
                         accelerator: 'CmdOrCtrl+V',
                         click: async () => await this.execute('paste', null),
                     },
                     {
                         id: 'edit.select-all',
-                        label: 'Select &All',
+                        label: '全选(&A)',
                         accelerator: 'CmdOrCtrl+A',
                         click: async () => await this.execute('selectall', null),
                     },
                     { type: 'separator' },
                     {
                         id: 'edit.find',
-                        label: '&Find...',
+                        label: '查找(&F)...',
                         accelerator: 'CmdOrCtrl+F',
                         click: async () => await this.execute('find', null),
                     }
@@ -478,7 +479,7 @@ app.Application = class {
             });
 
             const viewTemplate = {
-                label: '&View',
+                label: '视图(&V)',
                 submenu: [
                     {
                         id: 'view.toggle-attributes',
@@ -508,33 +509,33 @@ app.Application = class {
                     { type: 'separator' },
                     {
                         id: 'view.reload',
-                        label: '&Reload',
+                        label: '重新加载(&R)',
                         accelerator: darwin ? 'Cmd+R' : 'F5',
                         click: async () => await this._reload(),
                     },
                     { type: 'separator' },
                     {
                         id: 'view.zoom-reset',
-                        label: 'Actual &Size',
+                        label: '实际大小(&S)',
                         accelerator: 'Shift+Backspace',
                         click: async () => await this.execute('zoom-reset', null),
                     },
                     {
                         id: 'view.zoom-in',
-                        label: 'Zoom &In',
+                        label: '放大(&I)',
                         accelerator: 'Shift+Up',
                         click: async () => await this.execute('zoom-in', null),
                     },
                     {
                         id: 'view.zoom-out',
-                        label: 'Zoom &Out',
+                        label: '缩小(&O)',
                         accelerator: 'Shift+Down',
                         click: async () => await this.execute('zoom-out', null),
                     },
                     { type: 'separator' },
                     {
                         id: 'view.show-properties',
-                        label: '&Properties...',
+                        label: '属性(&P)...',
                         accelerator: 'CmdOrCtrl+Enter',
                         click: async () => await this.execute('show-properties', null),
                     }
@@ -560,7 +561,7 @@ app.Application = class {
 
             const helpSubmenu = [
                 {
-                    label: 'Report &Issue',
+                    label: '报告问题(&I)',
                     click: async () => await this.execute('report-issue', null)
                 }
             ];
@@ -568,7 +569,7 @@ app.Application = class {
             if (!darwin) {
                 helpSubmenu.push({ type: 'separator' });
                 helpSubmenu.push({
-                    label: `&About ${electron.app.name}`,
+                    label: `关于 ${electron.app.name}(&A)`,
                     click: async () => await this.execute('about', null)
                 });
             }
@@ -599,23 +600,23 @@ app.Application = class {
             });
             commandTable.set('view.toggle-attributes', {
                 enabled: (view) => view && view.path ? true : false,
-                label: (view) => !view || view.get('attributes') ? 'Hide &Attributes' : 'Show &Attributes'
+                label: (view) => !view || view.get('attributes') ? '隐藏属性(&A)' : '显示属性(&A)'
             });
             commandTable.set('view.toggle-weights', {
                 enabled: (view) => view && view.path ? true : false,
-                label: (view) => !view || view.get('weights') ? 'Hide &Weights' : 'Show &Weights'
+                label: (view) => !view || view.get('weights') ? '隐藏权重(&W)' : '显示权重(&W)'
             });
             commandTable.set('view.toggle-names', {
                 enabled: (view) => view && view.path ? true : false,
-                label: (view) => !view || view.get('names') ? 'Hide &Names' : 'Show &Names'
+                label: (view) => !view || view.get('names') ? '隐藏名称(&N)' : '显示名称(&N)'
             });
             commandTable.set('view.toggle-direction', {
                 enabled: (view) => view && view.path ? true : false,
-                label: (view) => !view || view.get('direction') === 'vertical' ? 'Show &Horizontal' : 'Show &Vertical'
+                label: (view) => !view || view.get('direction') === 'vertical' ? '横向布局(&H)' : '纵向布局(&V)'
             });
             commandTable.set('view.toggle-mousewheel', {
                 enabled: (view) => view && view.path ? true : false,
-                label: (view) => !view || view.get('mousewheel') === 'scroll' ? '&Mouse Wheel: Zoom' : '&Mouse Wheel: Scroll'
+                label: (view) => !view || view.get('mousewheel') === 'scroll' ? '鼠标滚轮：缩放(&M)' : '鼠标滚轮：滚动(&M)'
             });
             commandTable.set('view.reload', {
                 enabled: (view) => view && view.path ? true : false

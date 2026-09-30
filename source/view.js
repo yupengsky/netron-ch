@@ -8,6 +8,51 @@ const png = {};
 const metadata = {};
 const metrics = {};
 
+const localization = {
+    operators: new Map([
+        ['abs', '绝对值'], ['add', '加法'], ['and', '逻辑与'], ['argmax', '最大值索引'], ['argmin', '最小值索引'],
+        ['averagepool', '平均池化'], ['batchnormalization', '批量归一化'], ['cast', '类型转换'], ['ceil', '向上取整'],
+        ['clip', '裁剪'], ['concat', '拼接'], ['constant', '常量'], ['constantofshape', '形状常量'], ['conv', '卷积'],
+        ['convtranspose', '转置卷积'], ['div', '除法'], ['dropout', '随机失活'], ['equal', '相等'], ['erf', '误差函数'],
+        ['exp', '指数'], ['expand', '扩展'], ['flatten', '展平'], ['floor', '向下取整'], ['gather', '采集'],
+        ['gatherelements', '元素采集'], ['gemm', '通用矩阵乘法'], ['globalaveragepool', '全局平均池化'],
+        ['globalmaxpool', '全局最大池化'], ['greater', '大于'], ['greaterorequal', '大于或等于'], ['identity', '恒等映射'],
+        ['layernormalization', '层归一化'], ['leakyrelu', '泄漏修正线性'], ['less', '小于'], ['lessorequal', '小于或等于'],
+        ['log', '对数'], ['logsoftmax', '对数 Softmax'], ['matmul', '矩阵乘法'], ['max', '最大值'], ['maxpool', '最大池化'],
+        ['min', '最小值'], ['mul', '乘法'], ['neg', '取负'], ['nonzero', '非零索引'], ['not', '逻辑非'], ['or', '逻辑或'],
+        ['pad', '填充'], ['pow', '幂运算'], ['range', '范围'], ['reducemax', '最大值归约'], ['reducemean', '均值归约'],
+        ['reducemin', '最小值归约'], ['reducesum', '求和归约'], ['relu', '修正线性'], ['reshape', '重塑'],
+        ['resize', '调整大小'], ['round', '四舍五入'], ['scatterelements', '元素散射'], ['shape', '形状'],
+        ['sigmoid', 'Sigmoid 激活'], ['slice', '切片'], ['softmax', 'Softmax 激活'], ['split', '拆分'], ['sqrt', '平方根'],
+        ['squeeze', '压缩维度'], ['sub', '减法'], ['sum', '求和'], ['tanh', '双曲正切'], ['tile', '平铺'],
+        ['topk', '前 K 项'], ['transpose', '转置'], ['unsqueeze', '扩展维度'], ['where', '条件选择']
+    ]),
+    terms: new Map([
+        ['axis', '轴'], ['axes', '轴'], ['batch', '批次'], ['bias', '偏置'], ['category', '类别'],
+        ['constant_value', '常量值'], ['data', '数据'], ['denotation', '语义标注'], ['description', '描述'],
+        ['device', '设备'], ['dilations', '膨胀系数'], ['ends', '结束位置'], ['identifier', '标识符'],
+        ['indices', '索引'], ['input', '输入'], ['inputs', '输入'], ['kernel_shape', '卷积核形状'],
+        ['layout', '布局'], ['location', '位置'], ['mode', '模式'], ['module', '模块'], ['name', '名称'],
+        ['output', '输出'], ['outputs', '输出'], ['pads', '填充量'], ['perm', '排列'], ['repeats', '重复次数'],
+        ['shape', '形状'], ['sizes', '尺寸'], ['starts', '起始位置'], ['steps', '步长'], ['stride', '步长'],
+        ['strides', '步长'], ['tensor', '张量'], ['transposed', '转置结果'], ['type', '类型'], ['value', '值'],
+        ['weight', '权重'], ['weights', '权重']
+    ]),
+    operator(name) {
+        if (typeof name !== 'string') {
+            return name;
+        }
+        const identifier = name.includes('::') ? name.split('::').pop().split('.')[0] : name.split('.').pop();
+        return this.operators.get(identifier.toLowerCase()) || identifier;
+    },
+    term(name) {
+        if (typeof name !== 'string') {
+            return name;
+        }
+        return this.terms.get(name.toLowerCase()) || name;
+    }
+};
+
 view.View = class {
 
     constructor(host) {
@@ -101,78 +146,78 @@ view.View = class {
                 const menu = this._element('menu');
                 const button = this._element('menu-button');
                 this._menu.attach(menu, button);
-                const file = this._menu.group('&File');
+                const file = this._menu.group('文件(&F)');
                 file.add({
-                    label: '&Open...',
+                    label: '打开(&O)...',
                     accelerator: 'CmdOrCtrl+O',
                     execute: async () => await this._host.execute('open')
                 });
                 if (this._host.type === 'Electron') {
-                    this._recents = file.group('Open &Recent');
+                    this._recents = file.group('最近打开(&R)');
                     file.add({
-                        label: '&Export...',
+                        label: '导出(&E)...',
                         accelerator: 'CmdOrCtrl+Shift+E',
                         execute: async () => await this._host.execute('export'),
                         enabled: () => this.activeTarget
                     });
                     file.add({
-                        label: platform === 'darwin' ? '&Close Window' : '&Close',
+                        label: platform === 'darwin' ? '关闭窗口(&C)' : '关闭(&C)',
                         accelerator: 'CmdOrCtrl+W',
                         execute: async () => await this._host.execute('close'),
                     });
                     file.add({
-                        label: platform === 'win32' ? 'E&xit' : '&Quit',
+                        label: platform === 'win32' ? '退出(&X)' : '退出(&Q)',
                         accelerator: platform === 'win32' ? '' : 'CmdOrCtrl+Q',
                         execute: async () => await this._host.execute('quit'),
                     });
                 } else {
                     file.add({
-                        label: 'Export as &PNG',
+                        label: '导出为 PNG(&P)',
                         accelerator: 'CmdOrCtrl+Shift+E',
                         execute: async () => await this.export(`${this._host.document.title}.png`),
                         enabled: () => this.activeTarget
                     });
                     file.add({
-                        label: 'Export as &SVG',
+                        label: '导出为 SVG(&S)',
                         accelerator: 'CmdOrCtrl+Alt+E',
                         execute: async () => await this.export(`${this._host.document.title}.svg`),
                         enabled: () => this.activeTarget
                     });
                 }
-                const edit = this._menu.group('&Edit');
+                const edit = this._menu.group('编辑(&E)');
                 edit.add({
-                    label: '&Find...',
+                    label: '查找(&F)...',
                     accelerator: 'CmdOrCtrl+F',
                     execute: () => this.find(),
                     enabled: () => this.activeTarget
                 });
-                const view = this._menu.group('&View');
+                const view = this._menu.group('视图(&V)');
                 view.add({
-                    label: () => this.options.attributes ? 'Hide &Attributes' : 'Show &Attributes',
+                    label: () => this.options.attributes ? '隐藏属性(&A)' : '显示属性(&A)',
                     accelerator: 'CmdOrCtrl+D',
                     execute: () => this.toggle('attributes'),
                     enabled: () => this.activeTarget
                 });
                 view.add({
-                    label: () => this.options.weights ? 'Hide &Weights' : 'Show &Weights',
+                    label: () => this.options.weights ? '隐藏权重(&W)' : '显示权重(&W)',
                     accelerator: 'CmdOrCtrl+I',
                     execute: () => this.toggle('weights'),
                     enabled: () => this.activeTarget
                 });
                 view.add({
-                    label: () => this.options.names ? 'Hide &Names' : 'Show &Names',
+                    label: () => this.options.names ? '隐藏名称(&N)' : '显示名称(&N)',
                     accelerator: 'CmdOrCtrl+U',
                     execute: () => this.toggle('names'),
                     enabled: () => this.activeTarget
                 });
                 view.add({
-                    label: () => this.options.direction === 'vertical' ? 'Show &Horizontal' : 'Show &Vertical',
+                    label: () => this.options.direction === 'vertical' ? '横向布局(&H)' : '纵向布局(&V)',
                     accelerator: 'CmdOrCtrl+K',
                     execute: () => this.toggle('direction'),
                     enabled: () => this.activeTarget
                 });
                 view.add({
-                    label: () => this.options.mousewheel === 'scroll' ? '&Mouse Wheel: Zoom' : '&Mouse Wheel: Scroll',
+                    label: () => this.options.mousewheel === 'scroll' ? '鼠标滚轮：缩放(&M)' : '鼠标滚轮：滚动(&M)',
                     accelerator: 'CmdOrCtrl+M',
                     execute: () => this.toggle('mousewheel'),
                     enabled: () => this.activeTarget
@@ -180,7 +225,7 @@ view.View = class {
                 view.add({});
                 if (this._host.type === 'Electron') {
                     view.add({
-                        label: '&Reload',
+                        label: '重新加载(&R)',
                         accelerator: platform === 'darwin' ? 'CmdOrCtrl+R' : 'F5',
                         execute: async () => await this._host.execute('reload'),
                         enabled: () => this.activeTarget
@@ -188,26 +233,26 @@ view.View = class {
                     view.add({});
                 }
                 view.add({
-                    label: 'Zoom &In',
+                    label: '放大(&I)',
                     accelerator: 'Shift+Up',
                     execute: () => this.zoomIn(),
                     enabled: () => this.activeTarget && this.target
                 });
                 view.add({
-                    label: 'Zoom &Out',
+                    label: '缩小(&O)',
                     accelerator: 'Shift+Down',
                     execute: () => this.zoomOut(),
                     enabled: () => this.activeTarget && this.target
                 });
                 view.add({
-                    label: 'Actual &Size',
+                    label: '实际大小(&S)',
                     accelerator: 'Shift+Backspace',
                     execute: () => this.resetZoom(),
                     enabled: () => this.activeTarget && this.target
                 });
                 view.add({});
                 view.add({
-                    label: '&Properties...',
+                    label: '属性(&P)...',
                     accelerator: 'CmdOrCtrl+Enter',
                     execute: () => this.showTargetProperties(),
                     enabled: () => this.activeTarget
@@ -215,18 +260,18 @@ view.View = class {
                 if (this._host.type === 'Electron' && !this._host.environment('packaged')) {
                     view.add({});
                     view.add({
-                        label: '&Developer Tools...',
+                        label: '开发者工具(&D)...',
                         accelerator: 'CmdOrCtrl+Alt+I',
                         execute: async () => await this._host.execute('toggle-developer-tools')
                     });
                 }
-                const help = this._menu.group('&Help');
+                const help = this._menu.group('帮助(&H)');
                 help.add({
-                    label: 'Report &Issue',
+                    label: '报告问题(&I)',
                     execute: async () => await this._host.execute('report-issue')
                 });
                 help.add({
-                    label: `&About ${this._host.environment('name')}`,
+                    label: `关于 ${this._host.environment('name')}(&A)`,
                     execute: async () => await this._host.execute('about')
                 });
             }
@@ -304,7 +349,7 @@ view.View = class {
             sidebar.on('activate', (sender, value) => {
                 this._target.scrollTo(this._target.activate(value, 'sidebar'));
             });
-            this._sidebar.open(sidebar, 'Find');
+            this._sidebar.open(sidebar, '查找');
         }
     }
 
@@ -394,7 +439,7 @@ view.View = class {
         if (this._model && this._path.length > 0) {
             this._updateTarget(this._model, this._path).catch((error) => {
                 if (error) {
-                    this.error(error, 'Graph update failed.', 'welcome');
+                    this.error(error, '计算图更新失败。', 'welcome');
                 }
             });
         }
@@ -712,7 +757,7 @@ view.View = class {
         const message = error.message;
         name = name || error.name;
         const report = !message.startsWith('Invalid file content.') && this.host.environment('packaged');
-        await this._host.message(message, true, report ? 'Report' : 'OK');
+        await this._host.message(message, true, report ? '报告问题' : '确定');
         if (report) {
             this._host.openURL(url);
         }
@@ -781,7 +826,7 @@ view.View = class {
                 await this._updateTarget(this._model, stack);
             } catch (error) {
                 if (error) {
-                    this.error(error, 'Graph update failed.', 'welcome');
+                    this.error(error, '计算图更新失败。', 'welcome');
                 }
             }
         }
@@ -881,8 +926,13 @@ view.View = class {
             const button = this._element('sidebar-target-button');
             if (stack.length > 0) {
                 const type = stack[stack.length - 1].type || 'graph';
-                const name = type.charAt(0).toUpperCase() + type.slice(1);
-                button.setAttribute('title', `${name} Properties`);
+                const names = new Map([
+                    ['graph', '计算图'],
+                    ['function', '函数'],
+                    ['weights', '权重']
+                ]);
+                const name = names.get(type) || type;
+                button.setAttribute('title', `${name}属性`);
                 button.style.display = 'block';
             } else {
                 button.style.display = 'none';
@@ -1082,9 +1132,9 @@ view.View = class {
         }
         try {
             const sidebar = new view.ModelSidebar(this, this.model);
-            this._sidebar.open(sidebar, 'Model Properties');
+            this._sidebar.open(sidebar, '模型属性');
         } catch (error) {
-            this.error(error, 'Error showing model properties.', null);
+            this.error(error, '显示模型属性时出错。', null);
         }
     }
 
@@ -1121,20 +1171,20 @@ view.View = class {
             const type = target.type || 'graph';
             switch (type) {
                 case 'graph':
-                    title = 'Graph Properties';
+                    title = '计算图属性';
                     break;
                 case 'function':
-                    title = 'Function Properties';
+                    title = '函数属性';
                     break;
                 case 'weights':
-                    title = 'Weights Properties';
+                    title = '权重属性';
                     break;
                 default:
                     throw new view.Error(`Unsupported graph type '${type}'.`);
             }
             this._sidebar.open(sidebar, title);
         } catch (error) {
-            this.error(error, 'Error showing target properties.', null);
+            this.error(error, '显示图属性时出错。', null);
         }
     }
 
@@ -1160,9 +1210,9 @@ view.View = class {
                 sidebar.on('activate', (sender, value) => {
                     this._target.scrollTo(this._target.activate(value, 'sidebar'));
                 });
-                this._sidebar.open(sidebar, 'Node Properties', source);
+                this._sidebar.open(sidebar, '节点属性', source);
             } catch (error) {
-                this.error(error, 'Error showing node properties.', null);
+                this.error(error, '显示节点属性时出错。', null);
             }
         }
     }
@@ -1185,9 +1235,9 @@ view.View = class {
             sidebar.on('activate', (sender, value) => {
                 this._target.scrollTo(this._target.activate(value, 'sidebar'));
             });
-            this._sidebar.open(sidebar, 'Connection Properties', source);
+            this._sidebar.open(sidebar, '连接属性', source);
         } catch (error) {
-            this.error(error, 'Error showing connection properties.', null);
+            this.error(error, '显示连接属性时出错。', null);
         }
     }
 
@@ -1209,9 +1259,9 @@ view.View = class {
             sidebar.on('activate', (sender, value) => {
                 this._target.scrollTo(this._target.activate(value, 'sidebar'));
             });
-            this._sidebar.open(sidebar, 'Tensor Properties', source);
+            this._sidebar.open(sidebar, '张量属性', source);
         } catch (error) {
-            this.error(error, 'Error showing tensor properties.', null);
+            this.error(error, '显示张量属性时出错。', null);
         }
     }
 
@@ -1232,7 +1282,7 @@ view.View = class {
                 sidebar.on('navigate', (sender, e) => {
                     this._host.openURL(e.link);
                 });
-                const title = type.type === 'function' ? 'Function Documentation' : 'Documentation';
+                const title = type.type === 'function' ? '函数文档' : '文档';
                 this._sidebar.open(sidebar, title, 'sidebar');
             }
         }
@@ -2834,7 +2884,7 @@ view.Node = class extends grapher.Node {
             }
             throw error;
         }
-        let content = options.names && (node.name || node.identifier) ? (node.name || node.identifier) : node.type.name.split('.').pop();
+        let content = options.names && (node.name || node.identifier) ? (node.name || node.identifier) : localization.operator(node.type.name);
         let tooltip = options.names && (node.name || node.identifier) ? `[${node.type.name}]` : (node.name || node.identifier);
         if (content.length > 21) {
             tooltip = options.names ? `${content}` : `[${content}]`;
@@ -2852,12 +2902,12 @@ view.Node = class extends grapher.Node {
         if (type === 'graph') {
             this.definition = header.add(null, styles);
             this.definition.content = '\u25CB';
-            this.definition.tooltip = 'Show Graph';
+            this.definition.tooltip = '查看计算图';
             this.definition.padding = 4;
             this.definition.on('click', async () => await this.context.view.pushTarget(value, this.value));
             const expanded = this.context.blocks.has(value);
             const icon = expanded ? '\u2212' : '+';
-            const tooltip = expanded ? 'Collapse Graph' : 'Expand Graph';
+            const tooltip = expanded ? '折叠计算图' : '展开计算图';
             this.expander = header.add(null, styles);
             this.expander.content = icon;
             this.expander.tooltip = tooltip;
@@ -2873,10 +2923,10 @@ view.Node = class extends grapher.Node {
             });
         } else if (node.type.type || (Array.isArray(node.type.nodes) && node.type.nodes.length > 0)) {
             let icon = '\u0192';
-            let tooltip = 'Show Function Definition';
+            let tooltip = '查看函数定义';
             if (node.type.type === 'weights') {
                 icon = '\u25CF';
-                tooltip = 'Show Weights';
+                tooltip = '查看权重';
             }
             this.definition = header.add(null, styles);
             this.definition.content = icon;
@@ -2898,7 +2948,7 @@ view.Node = class extends grapher.Node {
             if (content && content.length > 12) {
                 content = `${content.substring(0, 12)}\u2026`;
             }
-            const item = list().argument(argument.name, content);
+            const item = list().argument(localization.term(argument.name), content);
             item.tooltip = argument.type;
             if (!content.startsWith('\u3008')) {
                 item.separator = ' = ';
@@ -2978,16 +3028,16 @@ view.Node = class extends grapher.Node {
                 content = this.context.createGraph(argument.value);
                 content.blocks.push(new view.Block(this.context.view, argument.value, this.context.blocks));
                 content.activate = () => this.context.view.showTargetProperties(argument.value);
-                const item = list().argument(argument.name, content);
+                const item = list().argument(localization.term(argument.name), content);
                 list().add(item);
             } else if (type === 'graph' || type === 'function') {
                 content = this.context.createGraph(argument.value, type);
                 content.activate = () => this.context.view.showTargetProperties(argument.value);
-                const item = list().argument(argument.name, content);
+                const item = list().argument(localization.term(argument.name), content);
                 list().add(item);
             } else if (type === 'graph[]') {
                 content = argument.value.map((value) => this.context.createGraph(value));
-                const item = list().argument(argument.name, content);
+                const item = list().argument(localization.term(argument.name), content);
                 list().add(item);
             } else {
                 if (argument.type === 'object') {
@@ -2995,7 +3045,7 @@ view.Node = class extends grapher.Node {
                 } else if (type === 'function[]' || argument.type === 'object[]') {
                     content = argument.value.map((value) => this.context.createNode(value));
                 }
-                const item = list().argument(argument.name, content);
+                const item = list().argument(localization.term(argument.name), content);
                 list().add(item);
             }
         }
@@ -3263,7 +3313,7 @@ view.Value = class {
 view.Argument = class extends grapher.Argument {
 
     constructor(context, value) {
-        const name = value.name;
+        const name = localization.term(value.name);
         let content = '';
         let separator = '';
         let tooltip = '';
@@ -3601,9 +3651,9 @@ view.TargetSelector = class extends view.Control {
                 functions.push({ name: func.name, target: func, signature: null });
             }
         }
-        section('Modules', modules);
-        section('Signatures', signatures);
-        section('Functions', functions);
+        section('模块', modules);
+        section('签名', signatures);
+        section('函数', functions);
         const visible = functions.length > 0 || signatures.length > 0 || modules.length > 1;
         this._element.style.display = visible ? 'inline' : 'none';
     }
@@ -3649,7 +3699,7 @@ view.ObjectSidebar = class extends view.Control {
         value.on('select', (sender, value) => this.emit('select', value));
         value.on('activate', (sender, value) => this.emit('activate', value));
         value.on('deactivate', (sender, value) => this.emit('deactivate', value));
-        this.addEntry(name, value);
+        this.addEntry(localization.term(name), value);
         return value;
     }
 
@@ -3657,7 +3707,7 @@ view.ObjectSidebar = class extends view.Control {
         super.error(error, fatal);
         const element = this.createElement('span');
         const title = this.createElement('b');
-        title.textContent = 'ERROR: ';
+        title.textContent = '错误：';
         element.appendChild(title);
         const message = this.createTextNode(` ${error.message}`);
         element.appendChild(message);
@@ -3680,13 +3730,14 @@ view.NodeSidebar = class extends view.ObjectSidebar {
         const node = this._node;
         if (node.type) {
             const type = node.type;
-            const item = this.addProperty('type', node.type.identifier || node.type.name);
+            const typeName = node.type.identifier || node.type.name;
+            const item = this.addProperty('类型', localization.operator(typeName));
             if (type && (type.description || type.inputs || type.outputs || type.attributes)) {
                 let icon = '?';
-                let tooltip = 'Show Definition';
+                let tooltip = '查看定义';
                 if (type.type === 'weights') {
                     icon = '\u25CF';
-                    tooltip = 'Show Weights';
+                    tooltip = '查看权重';
                 } else if (Array.isArray(type.nodes)) {
                     icon = '\u0192';
                 }
@@ -3700,24 +3751,24 @@ view.NodeSidebar = class extends view.ObjectSidebar {
             if (module || version || status) {
                 const list = [module, version ? `v${version}` : '', status];
                 const value = list.filter((value) => value).join(' ');
-                this.addProperty('module', value, 'nowrap');
+                this.addProperty('模块', value, 'nowrap');
             }
         }
         if (node.name) {
-            this.addProperty('name', node.name, 'nowrap');
+            this.addProperty('名称', node.name, 'nowrap');
         }
         if (node.identifier) {
-            this.addProperty('identifier', node.identifier, 'nowrap');
+            this.addProperty('标识符', node.identifier, 'nowrap');
         }
         if (node.description) {
-            this.addProperty('description', node.description);
+            this.addProperty('描述', node.description);
         }
         if (node.device) {
-            this.addProperty('device', node.device);
+            this.addProperty('设备', node.device);
         }
         const attributes = node.attributes;
         if (Array.isArray(attributes) && attributes.length > 0) {
-            this.addSection('Attributes');
+            this.addSection('属性');
             attributes.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
             for (const attribute of attributes) {
                 this.addArgument(attribute.name, attribute, 'attribute');
@@ -3725,7 +3776,7 @@ view.NodeSidebar = class extends view.ObjectSidebar {
         }
         const inputs = node.inputs;
         if (Array.isArray(inputs) && inputs.length > 0) {
-            this.addSection('Inputs');
+            this.addSection('输入');
             for (const input of inputs) {
                 const name = input.name;
                 this.addArgument(name, input);
@@ -3733,7 +3784,7 @@ view.NodeSidebar = class extends view.ObjectSidebar {
         }
         const outputs = node.outputs;
         if (Array.isArray(outputs) && outputs.length > 0) {
-            this.addSection('Outputs');
+            this.addSection('输出');
             for (const output of outputs) {
                 const name = output.name;
                 this.addArgument(name, output);
@@ -3741,7 +3792,7 @@ view.NodeSidebar = class extends view.ObjectSidebar {
         }
         const blocks = node.blocks;
         if (Array.isArray(blocks) && blocks.length > 0) {
-            this.addSection('Blocks');
+            this.addSection('块');
             for (const block of blocks) {
                 const name = block.name;
                 this.addArgument(name, block);
@@ -3749,14 +3800,14 @@ view.NodeSidebar = class extends view.ObjectSidebar {
         }
         const metadata = this._view.model.attachment.metadata.node(node);
         if (Array.isArray(metadata) && metadata.length > 0) {
-            this.addSection('Metadata');
+            this.addSection('元数据');
             for (const argument of metadata) {
                 this.addArgument(argument.name, argument, 'attribute');
             }
         }
         const metrics = this._view.model.attachment.metrics.node(node);
         if (Array.isArray(metrics) && metrics.length > 0) {
-            this.addSection('Metrics');
+            this.addSection('指标');
             for (const argument of metrics) {
                 this.addArgument(argument.name, argument, 'attribute');
             }
@@ -4005,7 +4056,7 @@ view.PrimitiveView = class extends view.Expander {
             }
         } catch (error) {
             super.error(error, false);
-            this._info('ERROR', error.message);
+            this._info('错误', error.message);
         }
     }
 
@@ -4020,7 +4071,7 @@ view.PrimitiveView = class extends view.Expander {
             if (content) {
                 content = this.escape(content);
                 const line = this.createElement('div', 'sidebar-item-value-line-border');
-                line.innerHTML = `type: <code><b>${content}</b></code>`;
+                line.innerHTML = `类型：<code><b>${content}</b></code>`;
                 this.add(line);
             }
             const description = this._argument.description;
@@ -4031,7 +4082,7 @@ view.PrimitiveView = class extends view.Expander {
             }
         } catch (error) {
             super.error(error, false);
-            this._info('ERROR', error.message);
+            this._info('错误', error.message);
         }
     }
 
@@ -4076,7 +4127,7 @@ view.ValueView = class extends view.Expander {
             if (initializer && source !== 'attribute') {
                 const element = this.createElement('div', 'sidebar-item-value-button');
                 element.classList.add('sidebar-item-value-button-tool');
-                element.setAttribute('title', 'Show Tensor');
+                element.setAttribute('title', '查看张量');
                 element.innerHTML = `<svg class='sidebar-find-content-icon'><use href="#sidebar-icon-weight"></use></svg>`;
                 element.addEventListener('pointerenter', () => this.emit('focus', this._value));
                 element.addEventListener('pointerleave', () => this.emit('blur', this._value));
@@ -4096,7 +4147,7 @@ view.ValueView = class extends view.Expander {
                 const text = this.createElement('b');
                 text.innerText = name || ' ';
                 const line = this.createElement('span', 'sidebar-item-value-line-content');
-                line.innerText = 'name: ';
+                line.innerText = '名称：';
                 line.appendChild(text);
                 element.appendChild(line);
                 element.addEventListener('pointerenter', () => this.emit('focus', this._value));
@@ -4111,7 +4162,7 @@ view.ValueView = class extends view.Expander {
             }
         } catch (error) {
             super.error(error, false);
-            this._info('ERROR', error.message);
+            this._info('错误', error.message);
         }
     }
 
@@ -4160,7 +4211,7 @@ view.ValueView = class extends view.Expander {
                 if (quantization.type && (quantization.type !== 'linear' || (value && value !== 'q'))) {
                     const line = this.createElement('div', 'sidebar-item-value-line-border');
                     const content = [
-                        `<span class='sidebar-item-value-line-content'>quantization: <b>${this.escape(quantization.type)}</b></span>`
+                        `<span class='sidebar-item-value-line-content'>量化：<b>${this.escape(quantization.type)}</b></span>`
                     ];
                     if (value) {
                         content.push(`<pre style='margin: 4px 0 2px 0'>${this.escape(value)}</pre>`);
@@ -4185,19 +4236,19 @@ view.ValueView = class extends view.Expander {
             }
         } catch (error) {
             super.error(error, false);
-            this._info('ERROR', error.message);
+            this._info('错误', error.message);
         }
     }
 
     _bold(name, value) {
         const line = this.createElement('div');
-        line.innerHTML = `${name}: <b>${this.escape(value)}</b>`;
+        line.innerHTML = `${localization.term(name)}：<b>${this.escape(value)}</b>`;
         this._add(line);
     }
 
     _code(name, value) {
         const line = this.createElement('div');
-        line.innerHTML = `${name}: <code><b>${this.escape(value)}</b></code>`;
+        line.innerHTML = `${localization.term(name)}：<code><b>${this.escape(value)}</b></code>`;
         this._add(line);
     }
 
@@ -4254,19 +4305,19 @@ view.TensorView = class extends view.Expander {
         const value = this._value;
         const tensor = this._tensor;
         if (tensor.encoding !== '<' && tensor.encoding !== '>' && tensor.encoding !== '|') {
-            content.innerHTML = `Tensor encoding '${this.escape(tensor.encoding)}' is not implemented.`;
+            content.innerHTML = `尚未实现张量编码“${this.escape(tensor.encoding)}”。`;
         } else if (tensor.layout && (tensor.layout !== 'sparse' && tensor.layout !== 'sparse.coo')) {
-            content.innerHTML = `Tensor layout '${this.escape(tensor.layout)}' is not implemented.`;
+            content.innerHTML = `尚未实现张量布局“${this.escape(tensor.layout)}”。`;
         } else if (tensor.type && tensor.type.dataType === '?') {
-            content.innerHTML = 'Tensor data type is not defined.';
+            content.innerHTML = '未定义张量数据类型。';
         } else if (tensor.type && !tensor.type.shape) {
-            content.innerHTML = 'Tensor shape is not defined.';
+            content.innerHTML = '未定义张量形状。';
         } else {
             content.innerHTML = '&#x23F3';
             const promise = value.peek && !value.peek() ? value.read() : Promise.resolve();
             promise.then(() => {
                 if (tensor.empty) {
-                    content.innerHTML = 'Tensor data is empty.';
+                    content.innerHTML = '张量数据为空。';
                 } else {
                     content.textContent = tensor.toString();
                     if (this._host.save && value.type.shape && value.type.shape.dimensions && value.type.shape.dimensions.length > 0) {
@@ -4291,7 +4342,7 @@ view.TensorView = class extends view.Expander {
         super.error(error, fatal);
         const element = this.createElement('div', 'sidebar-item-value-line');
         const title = this.createElement('b');
-        title.textContent = 'ERROR: ';
+        title.textContent = '错误：';
         element.appendChild(title);
         const message = this.createTextNode(error.message);
         element.appendChild(message);
@@ -4302,7 +4353,7 @@ view.TensorView = class extends view.Expander {
         const window = this._host.window;
         const tensor = this._tensor;
         const defaultPath = tensor.name ? tensor.name.split('/').join('_').split(':').join('_').split('.').join('_') : 'tensor';
-        const file = await this._host.save('NumPy Array', 'npy', defaultPath);
+        const file = await this._host.save('NumPy 数组', 'npy', defaultPath);
         if (file) {
             try {
                 let data_type = '?';
@@ -4341,7 +4392,7 @@ view.TensorView = class extends view.Expander {
                 const blob = new window.Blob([bytes.read()], { type: 'application/octet-stream' });
                 await this._host.export(file, blob);
             } catch (error) {
-                this._view.error(error, 'Error saving NumPy tensor.', null);
+                this._view.error(error, '保存 NumPy 张量时出错。', null);
             }
         }
     }
@@ -4358,9 +4409,9 @@ view.NodeView = class extends view.Expander {
             this.expandable();
         }
         if (type) {
-            const type = node.type.name;
+            const type = localization.operator(node.type.name);
             const element = this.createElement('div', 'sidebar-item-value-line');
-            element.innerHTML = `<span class='sidebar-item-value-line-content'>node: <b>${this.escape(type || ' ')}</b></span>`;
+            element.innerHTML = `<span class='sidebar-item-value-line-content'>节点：<b>${this.escape(type || ' ')}</b></span>`;
             element.addEventListener('pointerenter', () => this.emit('focus', this._node));
             element.addEventListener('pointerleave', () => this.emit('blur', this._node));
             element.addEventListener('click', () => this.emit('activate', this._node));
@@ -4368,7 +4419,7 @@ view.NodeView = class extends view.Expander {
             this.element.appendChild(element);
         } else {
             const element = this.createElement('div', 'sidebar-item-value-line');
-            element.innerHTML = `<span class='sidebar-item-value-line-content'>name: <b>${this.escape(name || ' ')}</b></span>`;
+            element.innerHTML = `<span class='sidebar-item-value-line-content'>名称：<b>${this.escape(name || ' ')}</b></span>`;
             element.addEventListener('pointerenter', () => this.emit('focus', this._node));
             element.addEventListener('pointerleave', () => this.emit('blur', this._node));
             element.addEventListener('click', () => this.emit('activate', this._node));
@@ -4380,7 +4431,7 @@ view.NodeView = class extends view.Expander {
     expand() {
         const name = this._node.name;
         const element = this.createElement('div', 'sidebar-item-value-line-border');
-        element.innerHTML = `<span class='sidebar-item-value-line-content'>name: <b>${this.escape(name)}</b></span>`;
+        element.innerHTML = `<span class='sidebar-item-value-line-content'>名称：<b>${this.escape(name)}</b></span>`;
         element.addEventListener('pointerenter', () => this.emit('focus', this._node));
         element.addEventListener('pointerleave', () => this.emit('blur', this._node));
         element.addEventListener('click', () => this.emit('activate', this._node));
@@ -4431,30 +4482,30 @@ view.ConnectionSidebar = class extends view.ObjectSidebar {
         const from = this._from;
         const to = this._to;
         const [name] = value.name.split('\n');
-        this.addProperty('name', name);
+        this.addProperty('名称', name);
         if (value.type) {
             const item = new view.ValueView(this._view, value);
-            this.addEntry('type', item);
+            this.addEntry('类型', item);
             item.toggle();
         }
         if (from) {
-            this.addSection('Inputs');
+            this.addSection('输入');
             this.addNodeList('from', [from]);
         }
         if (Array.isArray(to) && to.length > 0) {
-            this.addSection('Outputs');
+            this.addSection('输出');
             this.addNodeList('to', to);
         }
         const metadata = this._view.model.attachment.metadata.value(value);
         if (Array.isArray(metadata) && metadata.length > 0) {
-            this.addSection('Metadata');
+            this.addSection('元数据');
             for (const argument of metadata) {
                 this.addArgument(argument.name, argument, 'attribute');
             }
         }
         const metrics = this._view.model.attachment.metrics.value(value);
         if (Array.isArray(metrics) && metrics.length > 0) {
-            this.addSection('Metrics');
+            this.addSection('指标');
             for (const argument of metrics) {
                 this.addArgument(argument.name, argument, 'attribute');
             }
@@ -4509,54 +4560,54 @@ view.TensorSidebar = class extends view.ObjectSidebar {
         const tensor = value.initializer;
         const name = tensor && tensor.name ? tensor.name : value.name.split('\n')[0];
         if (name) {
-            this.addProperty('name', name);
+            this.addProperty('名称', name);
         }
         if (tensor) {
             const category = tensor.category;
             if (category) {
-                this.addProperty('category', category);
+                this.addProperty('类别', category);
             }
             const description = tensor.description;
             if (description) {
-                this.addProperty('description', description);
+                this.addProperty('描述', description);
             }
             const type = tensor.type;
             if (type) {
                 const dataType = type.dataType;
-                this.addProperty('type', `${dataType}`, 'code');
+                this.addProperty('类型', `${dataType}`, 'code');
                 const shape = type.shape && Array.isArray(type.shape.dimensions) ? type.shape.dimensions.toString(', ') : '?';
                 if (shape) {
-                    this.addProperty('shape', shape, 'code');
+                    this.addProperty('形状', shape, 'code');
                 }
                 const denotation = type.denotation;
                 if (denotation) {
-                    this.addProperty('denotation', denotation, 'code');
+                    this.addProperty('语义标注', denotation, 'code');
                 }
                 const layout = type.layout;
                 if (layout) {
-                    this.addProperty('layout', layout.replace('.', ' '));
+                    this.addProperty('布局', layout.replace('.', ' '));
                 }
             }
             const location = tensor.location;
             if (location) {
-                this.addProperty('location', tensor.location);
+                this.addProperty('位置', tensor.location);
             }
             const stride = tensor.stride;
             if (Array.isArray(stride) && stride.length > 0) {
-                this.addProperty('stride', stride.join(','), 'code');
+                this.addProperty('步长', stride.join(','), 'code');
             }
             const value = new view.TensorView(this._view, tensor, this._tensor);
-            this.addEntry('value', value);
+            this.addEntry('值', value);
             const attributes = tensor.attributes;
             if (Array.isArray(attributes) && attributes.length > 0) {
-                this.addSection('Attributes');
+                this.addSection('属性');
                 for (const attribute of attributes) {
                     this.addArgument(attribute.name, attribute, 'attribute');
                 }
             }
             const metadata = this._view.model.attachment.metadata.tensor(tensor);
             if (Array.isArray(metadata) && metadata.length > 0) {
-                this.addSection('Metadata');
+                this.addSection('元数据');
                 for (const argument of metadata) {
                     this.addArgument(argument.name, argument, 'attribute');
                 }
@@ -4574,7 +4625,7 @@ view.TensorSidebar = class extends view.ObjectSidebar {
                         this._metrics = this._view.model.attachment.metrics.tensor(tensor);
                     }
                     if (this._metrics.length > 0) {
-                        this.addSection('Metrics');
+                        this.addSection('指标');
                         for (const metric of this._metrics) {
                             const value = metric.type === 'percentage' ? `${(metric.value * 100).toFixed(1)}%` : metric.value;
                             const argument = new metadata.Argument(metric.name, value, metric.type);
@@ -4609,42 +4660,42 @@ view.ModelSidebar = class extends view.ObjectSidebar {
     render() {
         const model = this._model;
         if (model.format) {
-            this.addProperty('format', model.format);
+            this.addProperty('格式', model.format);
         }
         if (model.producer) {
-            this.addProperty('producer', model.producer);
+            this.addProperty('生成器', model.producer);
         }
         if (model.name) {
-            this.addProperty('name', model.name);
+            this.addProperty('名称', model.name);
         }
         if (model.version) {
-            this.addProperty('version', model.version);
+            this.addProperty('版本', model.version);
         }
         if (model.description) {
-            this.addProperty('description', model.description);
+            this.addProperty('描述', model.description);
         }
         if (model.domain) {
-            this.addProperty('domain', model.domain);
+            this.addProperty('域', model.domain);
         }
         if (model.imports) {
-            this.addProperty('imports', model.imports);
+            this.addProperty('导入', model.imports);
         }
         if (model.runtime) {
-            this.addProperty('runtime', model.runtime);
+            this.addProperty('运行时', model.runtime);
         }
         if (model.source) {
-            this.addProperty('source', model.source);
+            this.addProperty('来源', model.source);
         }
         const metadata = this._view.model.attachment.metadata.model(model);
         if (Array.isArray(metadata) && metadata.length > 0) {
-            this.addSection('Metadata');
+            this.addSection('元数据');
             for (const argument of metadata) {
                 this.addArgument(argument.name, argument, 'attribute');
             }
         }
         const metrics = this.metrics;
         if (Array.isArray(metrics) && metrics.length > 0) {
-            this.addSection('Metrics');
+            this.addSection('指标');
             for (const argument of metrics) {
                 this.addArgument(argument.name, argument, 'attribute');
             }
@@ -4669,40 +4720,40 @@ view.TargetSidebar = class extends view.ObjectSidebar {
         const target = this._target;
         const signature = this._signature;
         if (target.name) {
-            const item = this.addProperty('name', target.name);
+            const item = this.addProperty('名称', target.name);
             if (target.type === 'function') {
-                item.action('\u0192', 'Show Function Documentation', () => {
+                item.action('\u0192', '查看函数文档', () => {
                     this.emit('show-definition', null);
                 });
             }
         }
         if (signature && signature.name) {
-            this.addProperty('signature', signature.name);
+            this.addProperty('签名', signature.name);
         }
         if (target.version) {
-            this.addProperty('version', target.version);
+            this.addProperty('版本', target.version);
         }
         if (target.description) {
-            this.addProperty('description', target.description);
+            this.addProperty('描述', target.description);
         }
         const attributes = signature ? signature.attributes : target.attributes;
         const inputs = signature ? signature.inputs : target.inputs;
         const outputs = signature ? signature.outputs : target.outputs;
         if (Array.isArray(attributes) && attributes.length > 0) {
-            this.addSection('Attributes');
+            this.addSection('属性');
             for (const attribute of attributes) {
                 this.addProperty(attribute.name, attribute.value);
             }
         }
         if (Array.isArray(inputs) && inputs.length > 0) {
-            this.addSection('Inputs');
+            this.addSection('输入');
             for (const input of inputs) {
                 const value = this.addArgument(input.name, input);
                 value.toggle();
             }
         }
         if (Array.isArray(outputs) && outputs.length > 0) {
-            this.addSection('Outputs');
+            this.addSection('输出');
             for (const output of outputs) {
                 const value = this.addArgument(output.name, output);
                 value.toggle();
@@ -4710,14 +4761,14 @@ view.TargetSidebar = class extends view.ObjectSidebar {
         }
         const metadata = this._view.model.attachment.metadata.graph(target);
         if (Array.isArray(metadata) && metadata.length > 0) {
-            this.addSection('Metadata');
+            this.addSection('元数据');
             for (const argument of metadata) {
                 this.addArgument(argument.name, argument, 'attribute');
             }
         }
         const metrics = this.metrics;
         if (Array.isArray(metrics) && metrics.length > 0) {
-            this.addSection('Metrics');
+            this.addSection('指标');
             for (const argument of metrics) {
                 this.addArgument(argument.name, argument, 'attribute');
             }
@@ -4760,7 +4811,7 @@ view.DocumentationSidebar = class extends view.Control {
                 this._append(this.element, 'p', type.description);
             }
             if (Array.isArray(type.attributes) && type.attributes.length > 0) {
-                this._append(this.element, 'h2', 'Attributes');
+                this._append(this.element, 'h2', '属性');
                 const attributes = this._append(this.element, 'dl');
                 for (const attribute of type.attributes) {
                     this._append(attributes, 'dt', this._escape(attribute.name) + (attribute.type ? `: <tt>${this._escape(attribute.type)}</tt>` : ''));
@@ -4769,7 +4820,7 @@ view.DocumentationSidebar = class extends view.Control {
                 this.element.appendChild(attributes);
             }
             if (Array.isArray(type.inputs) && type.inputs.length > 0) {
-                this._append(this.element, 'h2', `Inputs${type.inputs_range ? ` (${type.inputs_range})` : ''}`);
+                this._append(this.element, 'h2', `输入${type.inputs_range ? ` (${type.inputs_range})` : ''}`);
                 const inputs = this._append(this.element, 'dl');
                 for (const input of type.inputs) {
                     this._append(inputs, 'dt', this._escape(input.name) + (input.type ? `: <tt>${this._escape(input.type)}</tt>` : '') + (input.option ? ` (${input.option})` : ''));
@@ -4777,7 +4828,7 @@ view.DocumentationSidebar = class extends view.Control {
                 }
             }
             if (Array.isArray(type.outputs) && type.outputs.length > 0) {
-                this._append(this.element, 'h2', `Outputs${type.outputs_range ? ` (${type.outputs_range})` : ''}`);
+                this._append(this.element, 'h2', `输出${type.outputs_range ? ` (${type.outputs_range})` : ''}`);
                 const outputs = this._append(this.element, 'dl');
                 for (const output of type.outputs) {
                     this._append(outputs, 'dt', this._escape(output.name) + (output.type ? `: <tt>${this._escape(output.type)}</tt>` : '') + (output.option ? ` (${output.option})` : ''));
@@ -4785,7 +4836,7 @@ view.DocumentationSidebar = class extends view.Control {
                 }
             }
             if (Array.isArray(type.type_constraints) && type.type_constraints.length > 0) {
-                this._append(this.element, 'h2', 'Type Constraints');
+                this._append(this.element, 'h2', '类型约束');
                 const type_constraints = this._append(this.element, 'dl');
                 for (const type_constraint of type.type_constraints) {
                     this._append(type_constraints, 'dt', `${type_constraint.type_param_str}: ${type_constraint.allowed_type_strs.map((item) => `<tt>${item}</tt>`).join(', ')}`);
@@ -4793,14 +4844,14 @@ view.DocumentationSidebar = class extends view.Control {
                 }
             }
             if (Array.isArray(type.examples) && type.examples.length > 0) {
-                this._append(this.element, 'h2', 'Examples');
+                this._append(this.element, 'h2', '示例');
                 for (const example of type.examples) {
                     this._append(this.element, 'h3', example.summary);
                     this._append(this.element, 'pre', example.code);
                 }
             }
             if (Array.isArray(type.references) && type.references.length > 0) {
-                this._append(this.element, 'h2', 'References');
+                this._append(this.element, 'h2', '参考资料');
                 const references = this._append(this.element, 'ul');
                 for (const reference of type.references) {
                     this._append(references, 'li', reference.description);
@@ -4840,7 +4891,7 @@ view.DocumentationSidebar = class extends view.Control {
         super.error(error, fatal);
         const element = this.createElement('span');
         const title = this.createElement('b');
-        title.textContent = 'ERROR: ';
+        title.textContent = '错误：';
         element.appendChild(title);
         const message = this.createTextNode(error.message);
         element.appendChild(message);
@@ -4861,9 +4912,9 @@ view.FindSidebar = class extends view.Control {
             weight: true
         };
         this._toggles = {
-            node: { hide: 'Hide Nodes', show: 'Show Nodes' },
-            connection: { hide: 'Hide Connections', show: 'Show Connections' },
-            weight: { hide: 'Hide Weights', show: 'Show Weights' }
+            node: { hide: '隐藏节点', show: '显示节点' },
+            connection: { hide: '隐藏连接', show: '显示连接' },
+            weight: { hide: '隐藏权重', show: '显示权重' }
         };
     }
 
@@ -4978,7 +5029,7 @@ view.FindSidebar = class extends view.Control {
             const type = node.type.name;
             const identifier = node.identifier;
             if ((name && this._term(name)) || (type && this._term(type)) || (identifier && this._term(identifier))) {
-                const content = `${name || `[${type}]`}`;
+                const content = `${name || `[${localization.operator(type)}]`}`;
                 this._add(node, content, 'node');
             }
         }
@@ -5119,7 +5170,7 @@ view.FindSidebar = class extends view.Control {
         this._query.setAttribute('id', 'search');
         this._query.setAttribute('type', 'text');
         this._query.setAttribute('spellcheck', 'false');
-        this._query.setAttribute('placeholder', 'Search');
+        this._query.setAttribute('placeholder', '搜索');
         this._query.addEventListener('input', (e) => {
             this._state.query = e.target.value;
             this.emit('state-changed', this._state);
@@ -5257,7 +5308,7 @@ view.FindSidebar = class extends view.Control {
         super.error(error, fatal);
         const element = this.createElement('li');
         const title = this.createElement('b');
-        title.textContent = 'ERROR: ';
+        title.textContent = '错误：';
         element.appendChild(title);
         const message = this.createTextNode(` ${error.message}`);
         element.appendChild(message);
